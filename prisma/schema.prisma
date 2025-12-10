@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client"
+  // el client se va a generar en ./generated/prisma
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  AGENT
+  ADMIN
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     Role   @default(USER)
+
+  ticketsCreated  Ticket[] @relation("TicketCreator")
+  ticketsAssigned Ticket[] @relation("TicketAssignee")
+  comments        Comment[]
+}
+
+model Ticket {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  status      String   @default("OPEN")
+  priority    String   @default("MEDIUM")
+  createdAt   DateTime @default(now())
+
+  creatorId Int
+  creator   User @relation("TicketCreator", fields: [creatorId], references: [id])
+
+  assigneeId Int?
+  assignee   User? @relation("TicketAssignee", fields: [assigneeId], references: [id])
+
+  comments Comment[]
+}
+
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  ticketId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  imageUrl  String?
+  createdAt DateTime @default(now())
+}
