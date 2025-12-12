@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("demian@example.com");
+  const [email, setEmail] = useState("agent@example.com");
   const [password, setPassword] = useState("1234");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,14 @@ export default function LoginPage() {
         throw new Error(data?.message || "Error al iniciar sesión");
       }
 
-      router.push("/tickets");
+      if (data.ok && data.user) {
+        if (data.user.role === "USER") {
+          router.push("/portal");
+        } else {
+          router.push("/tickets");
+        }
+      }
+
     } catch (err: any) {
       console.error(err);
       setError(err.message ?? "Error al iniciar sesión");
@@ -86,10 +93,21 @@ export default function LoginPage() {
           >
             {loading ? "Ingresando..." : "Entrar"}
           </button>
+          <div className="text-xs text-slate-400 text-center mt-4">
+            ¿No tenés cuenta?{" "}
+            <button
+              type="button"
+              onClick={() => router.push("/register")}
+              className="text-emerald-400 hover:underline"
+            >
+              Crear cuenta
+            </button>
+          </div>
+
         </form>
 
         <p className="mt-4 text-[11px] text-slate-500">
-          Demo: demian@example.com / 1234
+          Demo: agent@example.com / 1234
         </p>
       </div>
     </div>

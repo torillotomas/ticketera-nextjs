@@ -18,8 +18,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             Ticketera
           </div>
           <div className="text-[11px] text-slate-500">
-            Jira-lite by Demian
-          </div>
+            by Demian Tomas Torillo
+           </div>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1 text-sm">

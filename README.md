@@ -1,61 +1,105 @@
-# Ticketera Help Desk · Jira-lite by Demian
+# Ticketera Help Desk · Portal & Soporte (Jira-lite)
 
-Ticketera / Help Desk estilo **Jira-lite** construida con **Next.js 14 (App Router)**, **Prisma** y **PostgreSQL**.
-
-Proyecto pensado para portfolio como aplicación real de soporte: tickets, comentarios con capturas de pantalla, autenticación con JWT, roles de usuario y una interfaz moderna tipo panel.
+Aplicación **Help Desk / Ticketera** estilo Jira / InvGate, desarrollada con **Next.js (App Router)**, **Prisma** y **PostgreSQL**.
+Pensada como **proyecto de portfolio real**, con flujo completo USER → AGENT → cierre validado por el usuario.
 
 ---
 
-## ✨ Features principales
+## ✨ Funcionalidades principales
 
-- 🎫 **Gestión de tickets**
-  - Crear tickets con título, descripción y prioridad
-  - Listado de tickets con estado, prioridad, creador y fecha
-  - Vista de detalle por ticket
+### 🎫 Gestión de tickets
+- Crear tickets con **título, descripción, prioridad y categoría**
+- Código automático por ticket (ej: `TCK-001`)
+- Estados:
+  - `OPEN` → Abierto
+  - `IN_PROGRESS` → En progreso
+  - `PENDING` → Pendiente
+  - `RESOLVED` → Resuelto (espera confirmación del usuario)
+  - `CLOSED` → Cerrado (finalizado)
 
-- 🔐 **Autenticación y roles**
-  - Login con email + contraseña
-  - JWT en cookie **HTTP-only**
-  - Middleware que protege las rutas del dashboard
-  - Roles:
-    - `USER` → ve solo sus tickets
-    - `AGENT` → ve todos los tickets y puede gestionarlos
-    - `ADMIN` → pensado para administración avanzada
+### 👤 Portal de Usuario (USER)
+- Portal independiente (`/portal`)
+- Crear nuevas solicitudes
+- Ver **tickets activos y cerrados**
+- Ver **detalle completo del ticket** (historial + comentarios)
+- Confirmar solución → pasa el ticket a **CLOSED**
+- Adjuntar imágenes en comentarios (Ctrl+V o archivo)
 
-- 💬 **Comentarios con adjuntos**
-  - Comentarios por ticket
-  - Adjuntar **capturas de pantalla** en los comentarios
-  - Soporte para **pegar imágenes con Ctrl+V** desde el portapapeles
-  - Visualización de la miniatura de la imagen en el detalle del ticket
+### 🧑‍💻 Panel de Agentes (AGENT)
+- Bandejas:
+  - Tickets **sin asignar**
+  - Tickets **asignados al agente**
+- Tomar tickets desde la cola
+- Responder tickets con comentarios e imágenes
+- Marcar tickets como **RESOLVED**
 
-- 🧑‍💻 **Experiencia de agente**
-  - Panel de tickets activos
-  - Cambio de estado (Abierto, En progreso, Pendiente, Resuelto, Cerrado)
-  - Cambio de prioridad (Baja, Media, Alta, Urgente)
+### 🛠️ Administración (ADMIN)
+- Ver todos los tickets
+- Filtrar por:
+  - Sin asignar
+  - Por agente (dropdown)
+  - Todos
+- Control total del sistema
 
-- 🖥️ **UI / UX**
-  - Layout con sidebar + topbar
-  - Dark theme con Tailwind CSS
-  - Diseño responsive básico
+---
+
+## 🗂️ Categorías de ticket
+
+Definidas en Prisma:
+
+```prisma
+ enum TicketCategory {
+  ACCESS
+  HARDWARE
+  SOFTWARE
+  NETWORK
+  BUG
+  OTHER
+  FEATURE
+  PAYMENTS
+}
+
+```
+
+Seleccionables tanto por **USER** como por **AGENT** al crear tickets.
+
+---
+
+## 💬 Comentarios con adjuntos
+- Comentarios en tiempo real por ticket
+- Subida de imágenes
+- Pegado directo desde el portapapeles
+- Historial completo visible para USER y AGENT
+
+---
+
+## 🔐 Autenticación y seguridad
+- Login con email + contraseña
+- JWT en **cookies HTTP-only**
+- Middleware de Next.js para protección de rutas
+- Roles:
+  - `USER`
+  - `AGENT`
+  - `ADMIN`
 
 ---
 
 ## 🧱 Stack técnico
 
-- **Frontend**
-  - Next.js 14 (App Router)
-  - React
-  - Tailwind CSS
+### Frontend
+- Next.js (App Router)
+- React
+- Tailwind CSS
 
-- **Backend**
-  - Next.js API Routes (dentro de `app/api`)
-  - Prisma ORM
-  - PostgreSQL
+### Backend
+- API Routes (Next.js)
+- Prisma ORM
+- PostgreSQL
 
-- **Auth**
-  - JWT con `jose`
-  - Cookies HTTP-only
-  - Middleware de Next.js (`middleware.ts`)
+### Auth
+- JWT
+- Cookies HTTP-only
+- Middleware (`middleware.ts`)
 
 ---
 
@@ -65,111 +109,87 @@ Proyecto pensado para portfolio como aplicación real de soporte: tickets, comen
 app/
   (auth)/
     login/
-      page.tsx
+    register/
+
   (dashboard)/
-    layout.tsx
     tickets/
       page.tsx
       [id]/
-        page.tsx
+
+  (portal)/
+    portal/
+      page.tsx
+      my/
+      tickets/
+        [id]/
 
   api/
     auth/
-      login/route.ts
-      logout/route.ts
-      me/route.ts
     tickets/
       route.ts
       [id]/
         route.ts
         comments/
-          route.ts
+        close/
+        assign/
+    users/
     upload/
-      route.ts
-    seed-user/
-      route.ts
 
 components/
-  UserBadge.tsx
-  LogoutButton.tsx
-
 lib/
-  prisma.ts
-  auth.ts
-
 prisma/
-  schema.prisma
-
-public/
-  uploads/
+public/uploads/
 ```
 
 ---
 
-## ⚙️ Configuración y ejecución local
+## ⚙️ Configuración local
 
 ### 1. Requisitos
-
 - Node.js 18+
 - PostgreSQL
-- npm o pnpm
 
-### 2. Clonar el repositorio
-
-```bash
-git clone https://github.com/TU-USUARIO/ticketera-next.git
-cd ticketera-next
-```
-
-### 3. Instalar dependencias
-
+### 2. Instalación
 ```bash
 npm install
 ```
 
-### 4. Variables de entorno
-
-Crear `.env`:
-
+### 3. Variables de entorno
 ```env
 DATABASE_URL="postgres://USER:PASSWORD@localhost:5432/ticketera"
-AUTH_SECRET="cambia-esto-por-un-secreto-largo"
+AUTH_SECRET="secreto-largo"
 ```
 
-### 5. Migraciones
-
+### 4. Migraciones
 ```bash
-npx prisma migrate dev --name init
+npx prisma migrate dev
 ```
 
-### 6. Usuario demo
-
-```js
-fetch("/api/seed-user", { method: "POST" })
+### 5. Usuario demo
+```bash
+POST /api/seed-user
 ```
 
-Usuario:
-- **Email:** demian@example.com  
-- **Pass:** 1234
+Usuarios demo:
+- `demian@example.com` / 1234 (USER)
+- `agent@example.com` / 1234 (AGENT)
 
-### 7. Levantar servidor
-
+### 6. Levantar proyecto
 ```bash
 npm run dev
 ```
 
 ---
 
-## 🛣️ Roadmap
-
-- Kanban drag & drop  
-- Métricas y dashboard  
-- SLA  
-- Notificaciones en tiempo real  
-- Gestión de usuarios  
+## 🛣️ Roadmap futuro
+- Página de **configuración de usuario**
+- Métricas y SLA
+- Notificaciones
+- Kanban drag & drop
+- Auditoría de cambios
 
 ---
 
 ## 👤 Autor
-
-Desarrollado por **Demian Tomás Torillo** como proyecto de portfolio Full Stack.
+**Demian Tomás Torillo**  
+Proyecto Full Stack · Portfolio

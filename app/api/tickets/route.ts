@@ -4,6 +4,7 @@ import { getUserFromRequest } from "@/lib/auth";
 
 // GET /api/tickets
 export async function GET(req: NextRequest) {
+
   try {
     const authUser = await getUserFromRequest(req);
 
@@ -16,10 +17,25 @@ export async function GET(req: NextRequest) {
 
     const { userId, role } = authUser;
 
-    const where =
-      role === "USER"
-        ? { creatorId: userId } // USER solo ve sus tickets
-        : {}; // AGENT / ADMIN ven todos
+    const where: any = {};
+
+    where.status = { not: "CLOSED" };
+
+
+    if (role === "USER") {
+      // USER: solo sus tickets
+      where.creatorId = userId;
+    }
+
+    if (role === "AGENT") {
+      // AGENT: sin asignar O asignados a él
+      where.OR = [
+        { assigneeId: null },
+        { assigneeId: userId },
+      ];
+    }
+
+    // ADMIN: no se aplica filtro (ve todo)
 
     const tickets = await prisma.ticket.findMany({
       where,
@@ -30,6 +46,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
+
     return NextResponse.json({
       ok: true,
       tickets: tickets.map((t) => ({
@@ -38,6 +55,7 @@ export async function GET(req: NextRequest) {
         description: t.description,
         status: t.status,
         priority: t.priority,
+        category: t.category,
         createdAt: t.createdAt.toISOString(),
         creator: t.creator,
         assignee: t.assignee,
@@ -67,7 +85,7 @@ export async function POST(req: NextRequest) {
     const { userId } = authUser;
 
     const body = await req.json();
-    const { title, description, priority } = body;
+    const { title, description, priority, category } = body;
 
     if (!title || !description) {
       return NextResponse.json(
@@ -81,9 +99,11 @@ export async function POST(req: NextRequest) {
         title,
         description,
         priority: priority ?? "MEDIUM",
-        creatorId: userId, // 👈 ahora usamos el user logueado
+        category: category ?? "OTHER",
+        creatorId: userId,
       },
     });
+
 
     return NextResponse.json(
       { ok: true, ticket },
@@ -96,4 +116,5 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+
 }

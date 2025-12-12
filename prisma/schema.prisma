@@ -41,12 +41,25 @@ model User {
   comments        Comment[]
 }
 
+ enum TicketCategory {
+  ACCESS
+  HARDWARE
+  SOFTWARE
+  NETWORK
+  BUG
+  OTHER
+  FEATURE
+  PAYMENTS
+  }
+
+
 model Ticket {
   id          Int      @id @default(autoincrement())
   title       String
   description String
   status      String   @default("OPEN")
   priority    String   @default("MEDIUM")
+  category    TicketCategory @default(OTHER)
   createdAt   DateTime @default(now())
 
   creatorId Int
@@ -57,6 +70,7 @@ model Ticket {
 
   comments Comment[]
 }
+
 
 
 model Comment {

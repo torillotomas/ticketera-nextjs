@@ -1,17 +1,43 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { canCreateTicket } from "@/lib/permissions";
 
+type Role = "USER" | "AGENT" | "ADMIN";
+
+type Category = "ACCESS" | "BUG" | "REQUEST" | "HARDWARE" | "NETWORK" | "OTHER";
 
 type Ticket = {
   id: number;
-  code: string;
+  code?: string; // ✅ puede no venir, lo calculamos
   title: string;
-  requester: string;
   status: string;
   priority: string;
+  category?: Category; // ✅
   createdAt: string;
+  creator: {
+    name: string;
+    email: string;
+  };
+  assignee?: {
+    name: string;
+    email: string;
+  } | null;
+};
+
+type MeUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
+};
+
+type AgentUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
 };
 
 function statusBadge(status: string) {
@@ -37,7 +63,6 @@ function statusBadge(status: string) {
 function priorityBadge(priority: string) {
   const base =
     "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold";
-
   switch (priority) {
     case "URGENT":
       return `${base} bg-rose-500 text-rose-50`;
@@ -52,19 +77,59 @@ function priorityBadge(priority: string) {
   }
 }
 
+const CATEGORY_LABELS: Record<Category, string> = {
+  ACCESS: "Acceso",
+  BUG: "Bug",
+  REQUEST: "Solicitud",
+  HARDWARE: "Hardware",
+  NETWORK: "Red",
+  OTHER: "Otro",
+};
+
+function categoryBadge(category: Category) {
+  const base =
+    "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border";
+
+  switch (category) {
+    case "BUG":
+      return `${base} border-rose-500/40 bg-rose-500/10 text-rose-200`;
+    case "ACCESS":
+      return `${base} border-sky-500/40 bg-sky-500/10 text-sky-200`;
+    case "REQUEST":
+      return `${base} border-emerald-500/40 bg-emerald-500/10 text-emerald-200`;
+    case "HARDWARE":
+      return `${base} border-amber-500/40 bg-amber-500/10 text-amber-200`;
+    case "NETWORK":
+      return `${base} border-indigo-500/40 bg-indigo-500/10 text-indigo-200`;
+    default:
+      return `${base} border-slate-700 bg-slate-900 text-slate-300`;
+  }
+}
+
 type NewTicketForm = {
   title: string;
   description: string;
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  category: Category; // ✅
 };
+
+type Tab = "UNASSIGNED" | "MINE" | "BY_AGENT" | "ALL";
 
 export default function TicketsPage() {
   const router = useRouter();
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [agents, setAgents] = useState<AgentUser[]>([]);
+  const [selectedAgentEmail, setSelectedAgentEmail] = useState<string>("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // estado del modal de creación
+  const [me, setMe] = useState<MeUser | null>(null);
+  const [tab, setTab] = useState<Tab>("UNASSIGNED");
+  const [takingId, setTakingId] = useState<number | null>(null);
+
+  // modal creación
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -72,9 +137,65 @@ export default function TicketsPage() {
     title: "",
     description: "",
     priority: "MEDIUM",
+    category: "OTHER", // ✅
   });
 
-  // cargar tickets existentes
+  const ticketCode = (t: Ticket) => t.code ?? `TCK-${String(t.id).padStart(3, "0")}`;
+
+  async function handleTake(ticketId: number) {
+    if (!me) return;
+
+    try {
+      setTakingId(ticketId);
+
+      const res = await fetch(`/api/tickets/${ticketId}/assign`, {
+        method: "PATCH",
+      });
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.ok) {
+        alert(data?.message || "No se pudo tomar el ticket");
+        return;
+      }
+
+      // ✅ actualizamos estado local (asignado a mí)
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === ticketId ? { ...t, assignee: { name: me.name, email: me.email } } : t
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Error al tomar el ticket");
+    } finally {
+      setTakingId(null);
+    }
+  }
+
+  // cargar usuario
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMe() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data.ok && data.user) {
+          setMe(data.user);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadMe();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // cargar tickets
   useEffect(() => {
     const load = async () => {
       try {
@@ -82,12 +203,10 @@ export default function TicketsPage() {
         setError(null);
 
         const res = await fetch("/api/tickets");
-        if (!res.ok) {
-          throw new Error("No se pudieron cargar los tickets");
-        }
+        if (!res.ok) throw new Error("No se pudieron cargar los tickets");
 
         const data = await res.json();
-        setTickets(data.tickets ?? []);
+        setTickets((data.tickets ?? []) as Ticket[]);
       } catch (err: any) {
         console.error(err);
         setError(err.message ?? "Error al cargar tickets");
@@ -98,6 +217,35 @@ export default function TicketsPage() {
 
     load();
   }, []);
+
+  // cargar agentes (solo ADMIN) ✅ NO pisa selección
+  useEffect(() => {
+    if (me?.role !== "ADMIN") return;
+
+    let cancelled = false;
+
+    async function loadAgents() {
+      try {
+        const res = await fetch("/api/users?role=AGENT");
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!cancelled && data.ok && Array.isArray(data.users)) {
+          setAgents(data.users);
+
+          // ✅ solo setea default si todavía no hay uno elegido
+          setSelectedAgentEmail((prev) => prev || data.users[0]?.email || "");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadAgents();
+    return () => {
+      cancelled = true;
+    };
+  }, [me?.role]);
 
   const STATUS_LABELS: Record<string, string> = {
     OPEN: "Abierto",
@@ -114,20 +262,44 @@ export default function TicketsPage() {
     URGENT: "Urgente",
   };
 
+  const unassigned = useMemo(() => tickets.filter((t) => !t.assignee), [tickets]);
+
+  const mine = useMemo(
+    () => tickets.filter((t) => t.assignee?.email === me?.email),
+    [tickets, me?.email]
+  );
+
+  const bySelectedAgent = useMemo(() => {
+    if (!selectedAgentEmail) return [];
+    return tickets.filter((t) => t.assignee?.email === selectedAgentEmail);
+  }, [tickets, selectedAgentEmail]);
+
+  const visibleTickets = useMemo(() => {
+    if (me?.role === "ADMIN") {
+      if (tab === "UNASSIGNED") return unassigned;
+      if (tab === "BY_AGENT") return bySelectedAgent;
+      if (tab === "ALL") return tickets;
+      return unassigned;
+    }
+
+    if (tab === "MINE") return mine;
+    return unassigned;
+  }, [me?.role, tab, tickets, unassigned, mine, bySelectedAgent]);
+
+  // set tab inicial
+  useEffect(() => {
+    if (!me) return;
+    setTab("UNASSIGNED");
+  }, [me?.role]);
+
   const openCreateModal = () => {
-    setForm({
-      title: "",
-      description: "",
-      priority: "MEDIUM",
-    });
+    setForm({ title: "", description: "", priority: "MEDIUM", category: "OTHER" }); // ✅
     setCreateError(null);
     setShowCreate(true);
   };
 
   const closeCreateModal = () => {
-    if (!creating) {
-      setShowCreate(false);
-    }
+    if (!creating) setShowCreate(false);
   };
 
   async function handleCreate(e: FormEvent) {
@@ -143,31 +315,21 @@ export default function TicketsPage() {
 
       const res = await fetch("/api/tickets", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form), // ✅ incluye category
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.ok) {
         throw new Error(data?.message || "Error al crear el ticket.");
       }
 
-      const data = await res.json();
-      const newTicket: Ticket = {
-        id: data.ticket.id,
-        code: data.ticket.code,
-        title: data.ticket.title,
-        requester: "Demian (demo)", // por ahora, hasta que conectemos auth
-        status: data.ticket.status,
-        priority: data.ticket.priority,
-        createdAt: data.ticket.createdAt,
-      };
+      const created = data.ticket as Ticket;
 
-      // agregamos el ticket al principio de la lista
-      setTickets((prev) => [newTicket, ...prev]);
+      setTickets((prev) => [created, ...prev]);
       setShowCreate(false);
+      setTab("UNASSIGNED");
     } catch (err: any) {
       console.error(err);
       setCreateError(err.message ?? "Error al crear el ticket.");
@@ -181,116 +343,218 @@ export default function TicketsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            Tickets activos
-          </h1>
+          <h1 className="text-xl font-semibold tracking-tight">Tickets activos</h1>
           <p className="text-sm text-slate-400">
             Vista general de los tickets en la cola de soporte.
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800">
-            Filtros (próximamente)
-          </button>
-          <button
-            className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-3 py-1.5 text-xs font-semibold"
-            onClick={openCreateModal}
-          >
-            + Nuevo ticket
-          </button>
+          {me && canCreateTicket(me.role) && (
+            <button
+              className="rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-3 py-1.5 text-xs font-semibold"
+              onClick={openCreateModal}
+            >
+              + Nuevo ticket
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Estados de carga */}
-      {loading && (
-        <div className="text-sm text-slate-400">Cargando tickets...</div>
-      )}
+      {/* Tabs */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTab("UNASSIGNED")}
+            className={
+              "rounded-lg px-3 py-1.5 text-xs border " +
+              (tab === "UNASSIGNED"
+                ? "bg-slate-800 border-slate-600 text-slate-100"
+                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200")
+            }
+          >
+            Sin asignar{" "}
+            <span className="ml-1 text-[11px] text-slate-400">({unassigned.length})</span>
+          </button>
 
-      {error && !loading && (
-        <div className="text-sm text-rose-400">Error: {error}</div>
-      )}
+          {me?.role !== "ADMIN" && (
+            <button
+              type="button"
+              onClick={() => setTab("MINE")}
+              className={
+                "rounded-lg px-3 py-1.5 text-xs border " +
+                (tab === "MINE"
+                  ? "bg-slate-800 border-slate-600 text-slate-100"
+                  : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200")
+              }
+            >
+              Asignados a mí{" "}
+              <span className="ml-1 text-[11px] text-slate-400">({mine.length})</span>
+            </button>
+          )}
+
+          {me?.role === "ADMIN" && (
+            <>
+              <button
+                type="button"
+                onClick={() => setTab("BY_AGENT")}
+                className={
+                  "rounded-lg px-3 py-1.5 text-xs border " +
+                  (tab === "BY_AGENT"
+                    ? "bg-slate-800 border-slate-600 text-slate-100"
+                    : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200")
+                }
+              >
+                Por agente{" "}
+                <span className="ml-1 text-[11px] text-slate-400">
+                  ({selectedAgentEmail ? bySelectedAgent.length : 0})
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTab("ALL")}
+                className={
+                  "rounded-lg px-3 py-1.5 text-xs border " +
+                  (tab === "ALL"
+                    ? "bg-slate-800 border-slate-600 text-slate-100"
+                    : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200")
+                }
+              >
+                Todos{" "}
+                <span className="ml-1 text-[11px] text-slate-400">({tickets.length})</span>
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Dropdown de agentes */}
+        {me?.role === "ADMIN" && tab === "BY_AGENT" && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400">Agente</span>
+            <select
+              value={selectedAgentEmail}
+              onChange={(e) => setSelectedAgentEmail(e.target.value)}
+              className="bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg px-2 py-1"
+            >
+              {agents.length === 0 && <option value="">(sin agentes)</option>}
+              {agents.map((a) => (
+                <option key={a.id} value={a.email}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* Estados */}
+      {loading && <div className="text-sm text-slate-400">Cargando tickets...</div>}
+      {error && !loading && <div className="text-sm text-rose-400">Error: {error}</div>}
 
       {!loading && !error && (
         <>
-          {/* Lista de tickets */}
           <div className="mt-2 rounded-xl border border-slate-800 bg-slate-950/60 overflow-hidden">
-            <div className="grid grid-cols-12 gap-2 border-b border-slate-800 px-3 py-2 text-[11px] font-medium text-slate-400">
+            {/* ✅ ahora grid-cols-16 porque agregamos Categoría */}
+            <div className="grid grid-cols-16 gap-2 border-b border-slate-800 px-3 py-2 text-[11px] font-medium text-slate-400">
               <div className="col-span-3">Ticket</div>
               <div className="col-span-3">Solicitante</div>
               <div className="col-span-2">Estado</div>
               <div className="col-span-2">Prioridad</div>
-              <div className="col-span-2 text-right">Creado</div>
+              <div className="col-span-2">Categoría</div>
+
+              {me?.role === "AGENT" && tab === "UNASSIGNED" ? (
+                <div className="col-span-2 text-right">Acción</div>
+              ) : (
+                <div className="col-span-4 text-right">Creado</div>
+              )}
             </div>
 
-            {tickets.length === 0 ? (
+            {visibleTickets.length === 0 ? (
               <div className="px-3 py-4 text-sm text-slate-400">
-                No hay tickets todavía. Creá uno con el botón &quot;Nuevo
-                ticket&quot;.
+                {tab === "UNASSIGNED" && "No hay tickets sin asignar."}
+                {tab === "MINE" && "No tenés tickets asignados."}
+                {tab === "BY_AGENT" && "Ese agente no tiene tickets asignados."}
+                {tab === "ALL" && "No hay tickets."}
               </div>
             ) : (
               <div className="divide-y divide-slate-800">
-                {tickets.map((t) => (
-                  <div
-                    key={t.id}
-                    className="grid grid-cols-12 gap-2 px-3 py-3 text-[13px] hover:bg-slate-900/60 cursor-pointer"
-                    onClick={() => router.push(`/tickets/${t.id}`)}
+                {visibleTickets.map((t) => {
+                  const cat: Category = (t.category ?? "OTHER") as Category;
 
-                  >
-                    <div className="col-span-3">
-                      <div className="font-medium text-slate-100">
-                        {t.code}
+                  return (
+                    <div
+                      key={t.id}
+                      className="grid grid-cols-16 gap-2 px-3 py-3 text-[13px] hover:bg-slate-900/60 cursor-pointer"
+                      onClick={() => router.push(`/tickets/${t.id}`)}
+                    >
+                      <div className="col-span-3">
+                        <div className="font-medium text-slate-100">{ticketCode(t)}</div>
+                        <div className="text-xs text-slate-400 truncate">{t.title}</div>
                       </div>
-                      <div className="text-xs text-slate-400 truncate">
-                        {t.title}
+
+                      <div className="col-span-3">
+                        <span className="text-slate-200">{t.creator?.name ?? "-"}</span>
                       </div>
-                    </div>
-                    <div className="col-span-3">
-                      <span className="text-slate-200">{t.requester}</span>
-                    </div>
-                    <div className="col-span-2">
-                      <span className={statusBadge(t.status)}>
-                        {STATUS_LABELS[t.status] ?? t.status}
-                      </span>
 
-                    </div>
-                    <div className="col-span-2">
-                      <span className={priorityBadge(t.priority)}>
-                        {PRIORITY_LABELS[t.priority] ?? t.priority}
-                      </span>
+                      <div className="col-span-2">
+                        <span className={statusBadge(t.status)}>
+                          {STATUS_LABELS[t.status] ?? t.status}
+                        </span>
+                      </div>
 
+                      <div className="col-span-2">
+                        <span className={priorityBadge(t.priority)}>
+                          {PRIORITY_LABELS[t.priority] ?? t.priority}
+                        </span>
+                      </div>
+
+                      {/* ✅ Categoría */}
+                      <div className="col-span-2">
+                        <span className={categoryBadge(cat)}>
+                          {CATEGORY_LABELS[cat] ?? cat}
+                        </span>
+                      </div>
+
+                      {me?.role === "AGENT" && tab === "UNASSIGNED" ? (
+                        <div className="col-span-2 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTake(t.id);
+                            }}
+                            disabled={!!t.assignee || takingId === t.id}
+                            className="rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 px-3 py-1.5 text-xs font-semibold disabled:opacity-60"
+                          >
+                            {takingId === t.id ? "Tomando..." : "Tomar ticket"}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="col-span-4 text-right text-xs text-slate-400">
+                          {new Date(t.createdAt).toLocaleString("es-AR", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
+                        </div>
+                      )}
                     </div>
-                    <div className="col-span-2 text-right text-xs text-slate-400">
-                      {new Date(t.createdAt).toLocaleString("es-AR", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
-
-          <p className="text-[11px] text-slate-500">
-            Próximamente: kanban con drag &amp; drop, filtros avanzados,
-            asignación por agente y SLA.
-          </p>
         </>
       )}
 
-      {/* Modal de creación de ticket */}
-      {showCreate && (
+      {/* Modal creación */}
+      {showCreate && me && canCreateTicket(me.role) && (
         <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60">
           <div className="w-full max-w-lg rounded-2xl bg-slate-950 border border-slate-800 shadow-xl shadow-black/40 p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-100">
-                  Nuevo ticket
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Cargá un ticket para soporte. Más adelante esto lo va a hacer
-                  cualquier usuario.
-                </p>
+                <h2 className="text-lg font-semibold text-slate-100">Nuevo ticket</h2>
+                <p className="text-xs text-slate-400">Cargá un ticket para soporte.</p>
               </div>
               <button
                 type="button"
@@ -310,11 +574,8 @@ export default function TicketsPage() {
                 <input
                   type="text"
                   className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500"
-                  placeholder="Ej: No puedo acceder al sistema de facturación"
                   value={form.title}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, title: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 />
               </div>
 
@@ -324,12 +585,32 @@ export default function TicketsPage() {
                 </label>
                 <textarea
                   className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500 min-h-[100px] resize-y"
-                  placeholder="Contá qué estabas haciendo, qué error apareció, etc."
                   value={form.description}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, description: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 />
+              </div>
+
+              {/* ✅ Categoría */}
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Categoría
+                </label>
+                <select
+                  className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100"
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, category: e.target.value as Category }))
+                  }
+                >
+                  <option value="ACCESS">Accesos</option>
+                  <option value="BUG">Error / Bug</option>
+                  <option value="FEATURE">Mejora / Solicitud</option>
+                  <option value="PAYMENTS">Pagos / Facturación</option>
+                  <option value="SOFTWARE">Software</option>
+                  <option value="HARDWARE">Hardware</option>
+                  <option value="NETWORK">Redes/Internet</option>
+                  <option value="OTHER">Otro</option>
+                </select>
               </div>
 
               <div>
@@ -337,7 +618,7 @@ export default function TicketsPage() {
                   Prioridad
                 </label>
                 <select
-                  className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500"
+                  className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100"
                   value={form.priority}
                   onChange={(e) =>
                     setForm((f) => ({
@@ -353,9 +634,7 @@ export default function TicketsPage() {
                 </select>
               </div>
 
-              {createError && (
-                <div className="text-xs text-rose-400">{createError}</div>
-              )}
+              {createError && <div className="text-xs text-rose-400">{createError}</div>}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button

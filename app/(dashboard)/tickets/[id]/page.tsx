@@ -30,10 +30,22 @@ type Ticket = {
   comments: Comment[];
 };
 
+type Role = "USER" | "AGENT" | "ADMIN";
+
+type MeUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
+};
+
+
+
 export default function TicketDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string | undefined;
+  const [me, setMe] = useState<MeUser | null>(null);
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,6 +80,30 @@ export default function TicketDetailPage() {
 
     load();
   }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMe() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data.ok && data.user) {
+          setMe(data.user);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadMe();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+
 
   if (loading) {
     return <div className="text-sm text-slate-400">Cargando ticket...</div>;
@@ -191,6 +227,28 @@ export default function TicketDetailPage() {
         </div>
 
         <div className="text-right text-xs text-slate-400 space-y-4">
+          {/* TOMAR TICKET (solo AGENT y solo si no está asignado) */}
+          {me?.role === "AGENT" && !ticket.assignee && (
+            <button
+              onClick={async () => {
+                const res = await fetch(
+                  `/api/tickets/${ticket.id}/assign`,
+                  { method: "PATCH" }
+                );
+
+                if (res.ok) {
+                  window.location.reload();
+                } else {
+                  const data = await res.json().catch(() => null);
+                  alert(data?.message || "No se pudo asignar el ticket");
+                }
+              }}
+              className="rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 px-3 py-1.5 text-xs font-semibold"
+            >
+              Tomar ticket
+            </button>
+          )}
+
           {/* ESTADO */}
           <div className="flex flex-col items-end">
             <label className="text-[11px] text-slate-400 mb-1">Estado</label>
@@ -216,8 +274,7 @@ export default function TicketDetailPage() {
               <option value="OPEN">ABIERTO</option>
               <option value="IN_PROGRESS">EN PROGRESO</option>
               <option value="PENDING">PENDIENTE</option>
-              <option value="RESOLVED">RSUELTO</option>
-              <option value="CLOSED">CERRADO</option>
+              <option value="RESOLVED">RESUELTO</option>
             </select>
           </div>
 

@@ -111,16 +111,52 @@ export async function PATCH(
       );
     }
 
+    // Cargamos ticket para validar permisos finos
+    const existing = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: { assigneeId: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { ok: false, message: "Ticket no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // Si es AGENT, solo puede editar si:
+    // - está sin asignar (para tomarlo)
+    // - o está asignado a él
+    if (authUser.role === "AGENT") {
+      const isUnassigned = existing.assigneeId == null;
+      const isMine = existing.assigneeId === authUser.userId;
+
+      if (!isUnassigned && !isMine) {
+        return NextResponse.json(
+          { ok: false, message: "No autorizado" },
+          { status: 403 }
+        );
+      }
+    }
+
+
     const body = await req.json();
     const { status, priority, assigneeId } = body;
 
+    const dataToUpdate: any = {};
+    if (typeof status === "string") dataToUpdate.status = status;
+    if (typeof priority === "string") dataToUpdate.priority = priority;
+    if (assigneeId !== undefined) dataToUpdate.assigneeId = assigneeId;
+    if ((authUser.role === "AGENT" || authUser.role === "ADMIN") && status === "CLOSED") {
+      return NextResponse.json(
+        { ok: false, message: "El cierre lo confirma el solicitante (usuario)." },
+        { status: 403 }
+      );
+    }
+    
     const updated = await prisma.ticket.update({
       where: { id: ticketId },
-      data: {
-        status,
-        priority,
-        assigneeId,
-      },
+      data: dataToUpdate,
     });
 
     return NextResponse.json({ ok: true, ticket: updated });

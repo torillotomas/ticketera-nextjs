@@ -37,3 +37,17 @@ export const TicketPriority = {
 } as const
 
 export type TicketPriority = (typeof TicketPriority)[keyof typeof TicketPriority]
+
+
+export const TicketCategory = {
+  ACCESS: 'ACCESS',
+  HARDWARE: 'HARDWARE',
+  SOFTWARE: 'SOFTWARE',
+  NETWORK: 'NETWORK',
+  BUG: 'BUG',
+  OTHER: 'OTHER',
+  FEATURE: 'FEATURE',
+  PAYMENTS: 'PAYMENTS'
+} as const
+
+export type TicketCategory = (typeof TicketCategory)[keyof typeof TicketCategory]
