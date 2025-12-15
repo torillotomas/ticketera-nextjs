@@ -36,6 +36,18 @@ model User {
   password String
   role     Role   @default(USER)
 
+  avatarUrl String?
+  timezone  String  @default("America/Argentina/Buenos_Aires")
+
+  notifOnAssigned   Boolean @default(true)
+  notifOnComment    Boolean @default(true)
+  notifOnResolved   Boolean @default(true)
+
+  tokenVersion Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   ticketsCreated  Ticket[] @relation("TicketCreator")
   ticketsAssigned Ticket[] @relation("TicketAssignee")
   comments        Comment[]

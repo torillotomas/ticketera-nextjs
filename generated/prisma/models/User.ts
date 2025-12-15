@@ -28,10 +28,12 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -40,6 +42,14 @@ export type UserMinAggregateOutputType = {
   email: string | null
   password: string | null
   role: $Enums.Role | null
+  avatarUrl: string | null
+  timezone: string | null
+  notifOnAssigned: boolean | null
+  notifOnComment: boolean | null
+  notifOnResolved: boolean | null
+  tokenVersion: number | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -48,6 +58,14 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   password: string | null
   role: $Enums.Role | null
+  avatarUrl: string | null
+  timezone: string | null
+  notifOnAssigned: boolean | null
+  notifOnComment: boolean | null
+  notifOnResolved: boolean | null
+  tokenVersion: number | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -56,16 +74,26 @@ export type UserCountAggregateOutputType = {
   email: number
   password: number
   role: number
+  avatarUrl: number
+  timezone: number
+  notifOnAssigned: number
+  notifOnComment: number
+  notifOnResolved: number
+  tokenVersion: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
 
 export type UserAvgAggregateInputType = {
   id?: true
+  tokenVersion?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
+  tokenVersion?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -74,6 +102,14 @@ export type UserMinAggregateInputType = {
   email?: true
   password?: true
   role?: true
+  avatarUrl?: true
+  timezone?: true
+  notifOnAssigned?: true
+  notifOnComment?: true
+  notifOnResolved?: true
+  tokenVersion?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -82,6 +118,14 @@ export type UserMaxAggregateInputType = {
   email?: true
   password?: true
   role?: true
+  avatarUrl?: true
+  timezone?: true
+  notifOnAssigned?: true
+  notifOnComment?: true
+  notifOnResolved?: true
+  tokenVersion?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -90,6 +134,14 @@ export type UserCountAggregateInputType = {
   email?: true
   password?: true
   role?: true
+  avatarUrl?: true
+  timezone?: true
+  notifOnAssigned?: true
+  notifOnComment?: true
+  notifOnResolved?: true
+  tokenVersion?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -185,6 +237,14 @@ export type UserGroupByOutputType = {
   email: string
   password: string
   role: $Enums.Role
+  avatarUrl: string | null
+  timezone: string
+  notifOnAssigned: boolean
+  notifOnComment: boolean
+  notifOnResolved: boolean
+  tokenVersion: number
+  createdAt: Date
+  updatedAt: Date
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -216,6 +276,14 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  timezone?: Prisma.StringFilter<"User"> | string
+  notifOnAssigned?: Prisma.BoolFilter<"User"> | boolean
+  notifOnComment?: Prisma.BoolFilter<"User"> | boolean
+  notifOnResolved?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   ticketsCreated?: Prisma.TicketListRelationFilter
   ticketsAssigned?: Prisma.TicketListRelationFilter
   comments?: Prisma.CommentListRelationFilter
@@ -227,6 +295,14 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  notifOnAssigned?: Prisma.SortOrder
+  notifOnComment?: Prisma.SortOrder
+  notifOnResolved?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   ticketsCreated?: Prisma.TicketOrderByRelationAggregateInput
   ticketsAssigned?: Prisma.TicketOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
@@ -241,6 +317,14 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  timezone?: Prisma.StringFilter<"User"> | string
+  notifOnAssigned?: Prisma.BoolFilter<"User"> | boolean
+  notifOnComment?: Prisma.BoolFilter<"User"> | boolean
+  notifOnResolved?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   ticketsCreated?: Prisma.TicketListRelationFilter
   ticketsAssigned?: Prisma.TicketListRelationFilter
   comments?: Prisma.CommentListRelationFilter
@@ -252,6 +336,14 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  notifOnAssigned?: Prisma.SortOrder
+  notifOnComment?: Prisma.SortOrder
+  notifOnResolved?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -268,6 +360,14 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
+  avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  timezone?: Prisma.StringWithAggregatesFilter<"User"> | string
+  notifOnAssigned?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  notifOnComment?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  notifOnResolved?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
 export type UserCreateInput = {
@@ -275,6 +375,14 @@ export type UserCreateInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsCreated?: Prisma.TicketCreateNestedManyWithoutCreatorInput
   ticketsAssigned?: Prisma.TicketCreateNestedManyWithoutAssigneeInput
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
@@ -286,6 +394,14 @@ export type UserUncheckedCreateInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsCreated?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatorInput
   ticketsAssigned?: Prisma.TicketUncheckedCreateNestedManyWithoutAssigneeInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
@@ -296,6 +412,14 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsCreated?: Prisma.TicketUpdateManyWithoutCreatorNestedInput
   ticketsAssigned?: Prisma.TicketUpdateManyWithoutAssigneeNestedInput
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
@@ -307,6 +431,14 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsCreated?: Prisma.TicketUncheckedUpdateManyWithoutCreatorNestedInput
   ticketsAssigned?: Prisma.TicketUncheckedUpdateManyWithoutAssigneeNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
@@ -318,6 +450,14 @@ export type UserCreateManyInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type UserUpdateManyMutationInput = {
@@ -325,6 +465,14 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -333,6 +481,14 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -341,10 +497,19 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  notifOnAssigned?: Prisma.SortOrder
+  notifOnComment?: Prisma.SortOrder
+  notifOnResolved?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -353,6 +518,14 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  notifOnAssigned?: Prisma.SortOrder
+  notifOnComment?: Prisma.SortOrder
+  notifOnResolved?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -361,10 +534,19 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  notifOnAssigned?: Prisma.SortOrder
+  notifOnComment?: Prisma.SortOrder
+  notifOnResolved?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -385,12 +567,24 @@ export type EnumRoleFieldUpdateOperationsInput = {
   set?: $Enums.Role
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
 export type UserCreateNestedOneWithoutTicketsCreatedInput = {
@@ -442,6 +636,14 @@ export type UserCreateWithoutTicketsCreatedInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsAssigned?: Prisma.TicketCreateNestedManyWithoutAssigneeInput
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
 }
@@ -452,6 +654,14 @@ export type UserUncheckedCreateWithoutTicketsCreatedInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsAssigned?: Prisma.TicketUncheckedCreateNestedManyWithoutAssigneeInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
 }
@@ -466,6 +676,14 @@ export type UserCreateWithoutTicketsAssignedInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsCreated?: Prisma.TicketCreateNestedManyWithoutCreatorInput
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
 }
@@ -476,6 +694,14 @@ export type UserUncheckedCreateWithoutTicketsAssignedInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsCreated?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatorInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
 }
@@ -501,6 +727,14 @@ export type UserUpdateWithoutTicketsCreatedInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsAssigned?: Prisma.TicketUpdateManyWithoutAssigneeNestedInput
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
 }
@@ -511,6 +745,14 @@ export type UserUncheckedUpdateWithoutTicketsCreatedInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsAssigned?: Prisma.TicketUncheckedUpdateManyWithoutAssigneeNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
 }
@@ -531,6 +773,14 @@ export type UserUpdateWithoutTicketsAssignedInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsCreated?: Prisma.TicketUpdateManyWithoutCreatorNestedInput
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
 }
@@ -541,6 +791,14 @@ export type UserUncheckedUpdateWithoutTicketsAssignedInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsCreated?: Prisma.TicketUncheckedUpdateManyWithoutCreatorNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
 }
@@ -550,6 +808,14 @@ export type UserCreateWithoutCommentsInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsCreated?: Prisma.TicketCreateNestedManyWithoutCreatorInput
   ticketsAssigned?: Prisma.TicketCreateNestedManyWithoutAssigneeInput
 }
@@ -560,6 +826,14 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   email: string
   password: string
   role?: $Enums.Role
+  avatarUrl?: string | null
+  timezone?: string
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
   ticketsCreated?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatorInput
   ticketsAssigned?: Prisma.TicketUncheckedCreateNestedManyWithoutAssigneeInput
 }
@@ -585,6 +859,14 @@ export type UserUpdateWithoutCommentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsCreated?: Prisma.TicketUpdateManyWithoutCreatorNestedInput
   ticketsAssigned?: Prisma.TicketUpdateManyWithoutAssigneeNestedInput
 }
@@ -595,6 +877,14 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  notifOnAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifOnResolved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ticketsCreated?: Prisma.TicketUncheckedUpdateManyWithoutCreatorNestedInput
   ticketsAssigned?: Prisma.TicketUncheckedUpdateManyWithoutAssigneeNestedInput
 }
@@ -654,6 +944,14 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   password?: boolean
   role?: boolean
+  avatarUrl?: boolean
+  timezone?: boolean
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   ticketsCreated?: boolean | Prisma.User$ticketsCreatedArgs<ExtArgs>
   ticketsAssigned?: boolean | Prisma.User$ticketsAssignedArgs<ExtArgs>
   comments?: boolean | Prisma.User$commentsArgs<ExtArgs>
@@ -666,6 +964,14 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   password?: boolean
   role?: boolean
+  avatarUrl?: boolean
+  timezone?: boolean
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -674,6 +980,14 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   password?: boolean
   role?: boolean
+  avatarUrl?: boolean
+  timezone?: boolean
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -682,9 +996,17 @@ export type UserSelectScalar = {
   email?: boolean
   password?: boolean
   role?: boolean
+  avatarUrl?: boolean
+  timezone?: boolean
+  notifOnAssigned?: boolean
+  notifOnComment?: boolean
+  notifOnResolved?: boolean
+  tokenVersion?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "avatarUrl" | "timezone" | "notifOnAssigned" | "notifOnComment" | "notifOnResolved" | "tokenVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ticketsCreated?: boolean | Prisma.User$ticketsCreatedArgs<ExtArgs>
   ticketsAssigned?: boolean | Prisma.User$ticketsAssignedArgs<ExtArgs>
@@ -707,6 +1029,14 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     password: string
     role: $Enums.Role
+    avatarUrl: string | null
+    timezone: string
+    notifOnAssigned: boolean
+    notifOnComment: boolean
+    notifOnResolved: boolean
+    tokenVersion: number
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1138,6 +1468,14 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
+  readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
+  readonly timezone: Prisma.FieldRef<"User", 'String'>
+  readonly notifOnAssigned: Prisma.FieldRef<"User", 'Boolean'>
+  readonly notifOnComment: Prisma.FieldRef<"User", 'Boolean'>
+  readonly notifOnResolved: Prisma.FieldRef<"User", 'Boolean'>
+  readonly tokenVersion: Prisma.FieldRef<"User", 'Int'>
+  readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 

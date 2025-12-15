@@ -1,7 +1,7 @@
 # Ticketera Help Desk · Portal & Soporte (Jira-lite)
 
-Aplicación **Help Desk / Ticketera** estilo Jira / InvGate, desarrollada con **Next.js (App Router)**, **Prisma** y **PostgreSQL**.
-Pensada como **proyecto de portfolio real**, con flujo completo USER → AGENT → cierre validado por el usuario.
+Aplicación **Help Desk / Ticketera** estilo Jira / InvGate, desarrollada con **Next.js (App Router)**, **Prisma** y **PostgreSQL**.  
+Pensada como **proyecto de portfolio real**, con flujo completo **USER → AGENT → resolución → cierre validado**.
 
 ---
 
@@ -10,12 +10,14 @@ Pensada como **proyecto de portfolio real**, con flujo completo USER → AGENT �
 ### 🎫 Gestión de tickets
 - Crear tickets con **título, descripción, prioridad y categoría**
 - Código automático por ticket (ej: `TCK-001`)
-- Estados:
+- Estados del ticket:
   - `OPEN` → Abierto
   - `IN_PROGRESS` → En progreso
   - `PENDING` → Pendiente
   - `RESOLVED` → Resuelto (espera confirmación del usuario)
   - `CLOSED` → Cerrado (finalizado)
+
+---
 
 ### 👤 Portal de Usuario (USER)
 - Portal independiente (`/portal`)
@@ -23,7 +25,9 @@ Pensada como **proyecto de portfolio real**, con flujo completo USER → AGENT �
 - Ver **tickets activos y cerrados**
 - Ver **detalle completo del ticket** (historial + comentarios)
 - Confirmar solución → pasa el ticket a **CLOSED**
-- Adjuntar imágenes en comentarios (Ctrl+V o archivo)
+- Adjuntar imágenes en comentarios (archivo o pegar desde portapapeles)
+
+---
 
 ### 🧑‍💻 Panel de Agentes (AGENT)
 - Bandejas:
@@ -33,54 +37,57 @@ Pensada como **proyecto de portfolio real**, con flujo completo USER → AGENT �
 - Responder tickets con comentarios e imágenes
 - Marcar tickets como **RESOLVED**
 
+---
+
 ### 🛠️ Administración (ADMIN)
-- Ver todos los tickets
-- Filtrar por:
+- Ver todos los tickets del sistema
+- Filtros:
   - Sin asignar
-  - Por agente (dropdown)
+  - Por agente
   - Todos
-- Control total del sistema
+- Control completo del flujo de tickets
 
 ---
 
-## 🗂️ Categorías de ticket
+## ⚙️ Configuración de usuario (`/settings`)
 
-Definidas en Prisma:
+- Editar **nombre**, **avatar**, **zona horaria**
+- Preferencias de **notificaciones**
+- Cambio de contraseña
+- **Cerrar sesión en todos los dispositivos**
+- Subida de avatar con imagen (upload real al servidor)
 
-```prisma
- enum TicketCategory {
-  ACCESS
-  HARDWARE
-  SOFTWARE
-  NETWORK
-  BUG
-  OTHER
-  FEATURE
-  PAYMENTS
-}
+> La sesión se invalida globalmente mediante `tokenVersion` (logout-all real, estilo apps productivas).
 
-```
+---
 
-Seleccionables tanto por **USER** como por **AGENT** al crear tickets.
+## 🖼️ Avatar de usuario
+- Avatar por defecto con **inicial del nombre**
+- Subida de imagen desde configuración
+- Persistencia en base de datos
+- Visualización automática en el header
 
 ---
 
 ## 💬 Comentarios con adjuntos
-- Comentarios en tiempo real por ticket
+- Comentarios por ticket
 - Subida de imágenes
-- Pegado directo desde el portapapeles
 - Historial completo visible para USER y AGENT
 
 ---
 
 ## 🔐 Autenticación y seguridad
 - Login con email + contraseña
-- JWT en **cookies HTTP-only**
-- Middleware de Next.js para protección de rutas
+- JWT firmado (JOSE)
+- Cookies **HTTP-only**
 - Roles:
   - `USER`
   - `AGENT`
   - `ADMIN`
+- Invalidación global de sesiones (**logout en todos los dispositivos**)
+- Protección de rutas con:
+  - Middleware (solo UI)
+  - Validación server-side en layouts
 
 ---
 
@@ -97,9 +104,9 @@ Seleccionables tanto por **USER** como por **AGENT** al crear tickets.
 - PostgreSQL
 
 ### Auth
-- JWT
+- JWT (JOSE)
 - Cookies HTTP-only
-- Middleware (`middleware.ts`)
+- Middleware + Server Components
 
 ---
 
@@ -112,33 +119,35 @@ app/
     register/
 
   (dashboard)/
+    layout.tsx
     tickets/
       page.tsx
       [id]/
+    settings/
+      page.tsx
 
   (portal)/
     portal/
       page.tsx
-      my/
       tickets/
         [id]/
 
   api/
     auth/
-    tickets/
-      route.ts
-      [id]/
-        route.ts
-        comments/
-        close/
-        assign/
+      login/
+      logout/
+      logout-all/
+      me/
     users/
+      me/
+    tickets/
     upload/
+      avatar/
 
 components/
 lib/
 prisma/
-public/uploads/
+public/uploads/avatars/
 ```
 
 ---
@@ -171,8 +180,8 @@ POST /api/seed-user
 ```
 
 Usuarios demo:
-- `demian@example.com` / 1234 (USER)
-- `agent@example.com` / 1234 (AGENT)
+- `demian@example.com` / `1234` (USER)
+- `agent@example.com` / `1234` (AGENT)
 
 ### 6. Levantar proyecto
 ```bash
@@ -182,11 +191,11 @@ npm run dev
 ---
 
 ## 🛣️ Roadmap futuro
-- Página de **configuración de usuario**
 - Métricas y SLA
-- Notificaciones
+- Notificaciones en tiempo real
 - Kanban drag & drop
 - Auditoría de cambios
+- Integración con storage externo (S3 / Cloudinary)
 
 ---
 

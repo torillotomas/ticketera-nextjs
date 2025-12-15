@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -38,7 +40,9 @@ export async function POST(req: NextRequest) {
       email: user.email,
       name: user.name,
       role: user.role as any,
+      tokenVersion: user.tokenVersion,
     });
+
 
     const res = NextResponse.json(
       {

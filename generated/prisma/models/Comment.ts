@@ -478,10 +478,6 @@ export type CommentUncheckedUpdateManyWithoutTicketNestedInput = {
   deleteMany?: Prisma.CommentScalarWhereInput | Prisma.CommentScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type CommentCreateWithoutAuthorInput = {
   content: string
   imageUrl?: string | null

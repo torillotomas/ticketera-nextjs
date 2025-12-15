@@ -10,6 +10,7 @@ export type JwtPayload = {
   email: string;
   name: string;
   role: "USER" | "AGENT" | "ADMIN";
+  tokenVersion: number; // ok tenerlo en el token
 };
 
 export async function signAuthToken(payload: JwtPayload) {
@@ -25,13 +26,13 @@ export async function verifyAuthToken(token: string) {
   return payload as JwtPayload;
 }
 
+// ✅ Edge-safe: NO DB acá
 export async function getUserFromRequest(req: NextRequest) {
   const token = req.cookies.get("auth")?.value;
   if (!token) return null;
 
   try {
-    const payload = await verifyAuthToken(token);
-    return payload; // { userId, email, name, role }
+    return await verifyAuthToken(token);
   } catch {
     return null;
   }

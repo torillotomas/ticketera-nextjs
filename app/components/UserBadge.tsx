@@ -10,6 +10,7 @@ type MeUser = {
   name: string;
   email: string;
   role: Role;
+  avatarUrl: string | null;
 };
 
 export default function UserBadge() {
@@ -80,23 +81,40 @@ export default function UserBadge() {
     ADMIN: "Admin",
   };
 
-  return (
-    <div className="flex items-center gap-3 text-xs">
-      <div className="flex flex-col items-end leading-tight">
-        <span className="text-slate-100 font-medium">{user.name}</span>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200">
-            {roleLabel[user.role]}
-          </span>
-          <button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className="text-[11px] text-slate-400 hover:text-slate-100 disabled:opacity-60"
-          >
-            {loggingOut ? "Cerrando..." : "Cerrar sesión"}
-          </button>
-        </div>
+ return (
+  <div className="flex items-center gap-3 text-xs">
+    {/* Avatar */}
+    {user.avatarUrl ? (
+      <img
+        src={user.avatarUrl}
+        alt={user.name}
+        className="h-8 w-8 rounded-full object-cover border border-slate-700"
+      />
+    ) : (
+      <div className="h-8 w-8 rounded-full flex items-center justify-center
+                      bg-emerald-500/10 border border-emerald-500/40
+                      text-emerald-300 font-semibold text-xs">
+        {user.name.charAt(0).toUpperCase()}
+      </div>
+    )}
+
+    <div className="flex flex-col items-end leading-tight">
+      <span className="text-slate-100 font-medium">{user.name}</span>
+
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200">
+          {roleLabel[user.role]}
+        </span>
+
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="text-[11px] text-slate-400 hover:text-slate-100 disabled:opacity-60"
+        >
+          {loggingOut ? "Cerrando..." : "Cerrar sesión"}
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
 }

@@ -560,10 +560,6 @@ export type EnumTicketCategoryFieldUpdateOperationsInput = {
   set?: $Enums.TicketCategory
 }
 
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
-}
-
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
